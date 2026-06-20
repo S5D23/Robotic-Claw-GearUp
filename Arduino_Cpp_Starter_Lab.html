@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arduino &amp; C++ Starter Lab &mdash; GearUp Robotics</title>
+<style>
+  :root {
+    --ink:#13140f;
+    --paper:#fbfaf4;
+    --signal:#ffd400;
+    --signal-deep:#e6b800;
+    --wire:#e23b2e;
+    --pcb:#1f8a5b;
+    --slate:#55564d;
+    --line:#e4e2d6;
+    --code-bg:#15161a;
+    --code-fg:#e7e7df;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .mono { font-family:"SF Mono",ui-monospace,Menlo,Consolas,"Roboto Mono",monospace; }
+  code { font-family:"SF Mono",ui-monospace,Menlo,Consolas,"Roboto Mono",monospace; }
+
+  /* ---- hazard header ---- */
+  header.hero {
+    background:var(--ink); color:var(--paper);
+    padding:0 0 38px;
+    position:relative; overflow:hidden;
+  }
+  .hazard {
+    height:16px;
+    background:repeating-linear-gradient(45deg,var(--signal) 0 22px,var(--ink) 22px 44px);
+  }
+  .hero-inner { max-width:980px; margin:0 auto; padding:42px 28px 0; }
+  .brand {
+    display:inline-flex; align-items:center; gap:10px;
+    font-weight:800; letter-spacing:.16em; font-size:.74rem; text-transform:uppercase;
+    color:var(--signal);
+  }
+  .brand .bolt { width:16px;height:16px; display:inline-block; }
+  .hero h1 {
+    font-size:clamp(2.1rem,6vw,3.5rem); line-height:1.02; margin:.45em 0 .25em;
+    font-weight:800; letter-spacing:-.02em;
+  }
+  .hero h1 b { color:var(--signal); font-weight:800; }
+  .hero .lede { max-width:60ch; color:#d9d8cf; font-size:1.08rem; margin:0 0 24px; }
+  .hero .meta { display:flex; flex-wrap:wrap; gap:8px; }
+  .hero .meta span {
+    border:1px solid #3a3b33; border-radius:999px; padding:5px 13px;
+    font-size:.8rem; color:#cfceC4;
+  }
+
+  main { max-width:980px; margin:0 auto; padding:0 28px; }
+
+  /* ---- setup card ---- */
+  .setup {
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    margin:-26px 0 40px; padding:26px 28px; position:relative; z-index:2;
+    box-shadow:0 10px 30px rgba(19,20,15,.08);
+  }
+  .setup h2 { margin:0 0 4px; font-size:1.05rem; letter-spacing:.04em; text-transform:uppercase; }
+  .setup .kicker { color:var(--pcb); font-weight:700; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:18px 26px; margin-top:18px; }
+  .step { display:flex; gap:12px; }
+  .step .num {
+    flex:0 0 28px; height:28px; border-radius:50%;
+    background:var(--signal); color:var(--ink); font-weight:800;
+    display:grid; place-items:center; font-size:.9rem;
+  }
+  .step p { margin:0; font-size:.92rem; }
+  .step p b { display:block; }
+  .needbar {
+    margin-top:22px; padding:12px 16px; border-radius:10px;
+    background:#fffbe6; border:1px solid var(--signal-deep);
+    font-size:.92rem;
+  }
+  .needbar b { color:#7a5e00; }
+
+  /* ---- toc ---- */
+  .toc { display:grid; gap:0; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:48px; background:#fff; }
+  .toc a {
+    display:grid; grid-template-columns:48px 1fr; grid-template-rows:auto auto;
+    column-gap:14px; padding:14px 20px; text-decoration:none; color:var(--ink);
+    border-bottom:1px solid var(--line); transition:background .15s;
+  }
+  .toc a:last-child { border-bottom:none; }
+  .toc a:hover { background:#fcfbf2; }
+  .toc .t-n { grid-row:1/3; align-self:center; font-weight:800; color:var(--signal-deep); font-size:1.3rem; }
+  .toc .t-t { font-weight:700; }
+  .toc .t-c { color:var(--slate); font-size:.86rem; }
+
+  /* ---- lessons ---- */
+  .lesson { margin:0 0 60px; scroll-margin-top:20px; }
+  .lesson-head { display:flex; align-items:flex-start; gap:20px; border-bottom:3px solid var(--ink); padding-bottom:16px; margin-bottom:20px; }
+  .lnum {
+    flex:0 0 auto; font-weight:800; font-size:2.3rem; line-height:1;
+    background:var(--ink); color:var(--signal); border-radius:12px;
+    padding:14px 16px; letter-spacing:-.02em;
+  }
+  .lhead-text h2 { margin:0; font-size:1.7rem; letter-spacing:-.01em; }
+  .lhead-text .sub { margin:2px 0 12px; color:var(--slate); font-style:italic; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; }
+  .chip {
+    background:#fff; border:1px solid var(--line); border-radius:6px;
+    padding:3px 9px; font-size:.76rem; font-weight:600; color:var(--slate);
+  }
+  .tag {
+    display:inline-block; background:var(--ink); color:var(--signal);
+    font-size:.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    padding:3px 8px; border-radius:5px; margin-right:10px; vertical-align:1px;
+  }
+  .tag.warn { background:var(--wire); color:#fff; }
+  .does { font-size:1.02rem; }
+
+  .panels { display:grid; grid-template-columns:1.45fr 1fr; gap:18px; margin:22px 0; }
+  figure { margin:0; border-radius:12px; overflow:hidden; border:1px solid #2a2b30; }
+  figcaption {
+    background:#21222a; color:#b9b9b2; font-size:.78rem; padding:9px 14px;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; letter-spacing:.02em;
+    display:flex; align-items:center;
+  }
+  .dot { width:11px;height:11px;border-radius:50%; margin-right:6px; display:inline-block; }
+  .dot.r{background:#ff5f56} .dot.y{background:#ffbd2e} .dot.g{background:#27c93f}
+  pre { margin:0; padding:16px 18px; overflow-x:auto; font-size:.84rem; line-height:1.55; }
+  .ide pre { background:var(--code-bg); color:var(--code-fg); }
+  .monitor figcaption { background:#0c2e22; color:#8fe0bb; }
+  .monitor pre { background:#06160f; color:#74e8a8; font-size:.82rem; }
+
+  /* code colors */
+  .c-com { color:#7d8590; font-style:italic; }
+  .c-str { color:#a5d6a3; }
+  .c-num { color:#f0b56b; }
+  .c-kw  { color:#ff9bb3; font-weight:600; }
+  .c-ard { color:#79c0ff; }
+
+  .watch { background:#fff5f4; border-left:4px solid var(--wire); padding:14px 18px; border-radius:0 10px 10px 0; margin:8px 0 24px; font-size:.96rem; }
+  .concept, .trythis { margin:20px 0; }
+  .concept h3, .trythis h3 { font-size:1.02rem; margin:0 0 8px; }
+  .concept { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; }
+  .concept h3::before { content:"\25C6"; color:var(--pcb); margin-right:8px; }
+  .trythis h3::before { content:"\2192"; color:var(--signal-deep); font-weight:800; margin-right:8px; }
+  .trythis ol { margin:0; padding-left:22px; }
+  .trythis li { margin:6px 0; }
+  code:not(pre code) { background:#f0efe6; border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:.85em; }
+
+  footer { border-top:3px solid var(--ink); margin-top:30px; padding:30px 0 60px; color:var(--slate); font-size:.9rem; }
+  footer .hazard-thin { height:10px; margin-bottom:24px;
+    background:repeating-linear-gradient(45deg,var(--signal) 0 16px,var(--ink) 16px 32px); }
+  footer .foot-inner { max-width:980px; margin:0 auto; padding:0 28px; }
+
+  a.back { color:var(--slate); text-decoration:none; font-size:.84rem; }
+  a.back:hover { color:var(--ink); }
+
+  @media (max-width:720px) {
+    .panels { grid-template-columns:1fr; }
+    .lesson-head { flex-direction:row; }
+    .lnum { font-size:1.6rem; padding:10px 12px; }
+  }
+  @media print {
+    body { background:#fff; }
+    .toc, .hero .meta { display:none; }
+    .lesson { page-break-inside:avoid; }
+    figure, .concept, .setup { box-shadow:none; }
+    .ide pre { background:#15161a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hazard"></div>
+  <div class="hero-inner">
+    <span class="brand"><svg class="bolt" viewBox="0 0 24 24" fill="#ffd400"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> GearUp Robotics &middot; FTC #31242</span>
+    <h1>Arduino &amp; <b>C++</b><br>Starter Lab</h1>
+    <p class="lede">Five short programs that each teach a core idea in C++. Every lesson runs
+      with <b>just the board and a USB cable</b> &mdash; no extra parts &mdash; so anyone can
+      start coding hardware today.</p>
+    <div class="meta">
+      <span>5 lessons</span><span>No extra components</span><span>Arduino IDE</span><span>Beginner friendly</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="setup">
+    <span class="kicker">Before you start</span>
+    <h2>Get the board talking in four steps</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><p><b>Install the Arduino IDE</b>Download it free from arduino.cc and open it.</p></div>
+      <div class="step"><div class="num">2</div><p><b>Plug in &amp; pick the board</b>Connect by USB, then choose your board and port under <i>Tools</i>.</p></div>
+      <div class="step"><div class="num">3</div><p><b>Paste &amp; upload</b>Copy a lesson's code into a new sketch and press the arrow (&rarr;) to upload.</p></div>
+      <div class="step"><div class="num">4</div><p><b>Open the Serial Monitor</b>Click the magnifying-glass icon and set the speed to <b>9600 baud</b>.</p></div>
+    </div>
+    <div class="needbar"><b>What you need:</b> any Arduino-compatible board (Uno, Nano, or
+      ESP32), a USB cable, and a computer. That's it &mdash; the on-board LED does the rest.</div>
+  </div>
+
+  <nav class="toc"><a href="#lesson-1"><span class="t-n">01</span><span class="t-t">Variables &amp; Data Types</span><span class="t-c">variables, data types, const&hellip;</span></a><a href="#lesson-2"><span class="t-n">02</span><span class="t-t">Functions &amp; Loops</span><span class="t-c">functions, parameters, return values&hellip;</span></a><a href="#lesson-3"><span class="t-n">03</span><span class="t-t">Conditions &amp; Operators</span><span class="t-c">if / else, comparison, &amp;&amp; || !&hellip;</span></a><a href="#lesson-4"><span class="t-n">04</span><span class="t-t">Arrays</span><span class="t-c">arrays, indexing, sizeof length&hellip;</span></a><a href="#lesson-5"><span class="t-n">05</span><span class="t-t">Structs</span><span class="t-c">struct, grouping data, array of structs&hellip;</span></a></nav>
+
+  
+    <section class="lesson" id="lesson-1">
+      <div class="lesson-head">
+        <div class="lnum">01</div>
+        <div class="lhead-text">
+          <h2>Variables &amp; Data Types</h2>
+          <p class="sub">Teaching the computer to remember things</p>
+          <div class="chips"><span class="chip">variables</span><span class="chip">data types</span><span class="chip">const</span><span class="chip">comments</span><span class="chip">Serial output</span></div>
+        </div>
+      </div>
+
+      <p class="does"><span class="tag">What it does</span>Stores six different kinds of value, prints them to the Serial Monitor, then blinks the on-board LED while counting each blink.</p>
+
+      <div class="panels">
+        <figure class="ide">
+          <figcaption><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp; Lesson1_Variables.ino</figcaption>
+          <pre><code><span class="c-com">/*</span>
+<span class="c-com">  Lesson 1 - Variables &amp; Data Types</span>
+<span class="c-com">  GearUp Robotics - Arduino &amp; C++ Starter Lab</span>
+<span class="c-com"></span>
+<span class="c-com">  Goal: learn how C++ stores different kinds of information,</span>
+<span class="c-com">  and how to print it to the Serial Monitor.</span>
+<span class="c-com">  Hardware: just your Arduino board + USB cable.</span>
+<span class="c-com">*/</span>
+
+<span class="c-com">// A constant never changes while the program runs.</span>
+<span class="c-kw">const</span> <span class="c-kw">int</span> blinkPin = <span class="c-ard">LED_BUILTIN</span>;    <span class="c-com">// the LED already on your board</span>
+
+<span class="c-com">// Variables hold values that CAN change.</span>
+<span class="c-kw">int</span>    blinkCount   = <span class="c-num">0</span>;        <span class="c-com">// whole numbers</span>
+<span class="c-kw">long</span>   bigNumber    = <span class="c-num">100000</span>;   <span class="c-com">// bigger whole numbers</span>
+<span class="c-kw">float</span>  batteryVolts = <span class="c-num">7.4</span>;      <span class="c-com">// numbers with decimals</span>
+<span class="c-kw">bool</span>   ledIsOn      = <span class="c-kw">false</span>;    <span class="c-com">// true or false</span>
+<span class="c-kw">char</span>   grade        = <span class="c-str">&#x27;A&#x27;</span>;      <span class="c-com">// a single character</span>
+<span class="c-kw">String</span> teamName     = <span class="c-str">&quot;GearUp&quot;</span>; <span class="c-com">// a line of text</span>
+
+<span class="c-kw">void</span> <span class="c-ard">setup</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">begin</span>(<span class="c-num">9600</span>);            <span class="c-com">// open the channel to the computer</span>
+  <span class="c-ard">pinMode</span>(blinkPin, <span class="c-ard">OUTPUT</span>);     <span class="c-com">// we will control this pin</span>
+
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;=== Lesson 1: Data Types ===&quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Team: &quot;</span>);        <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(teamName);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Grade: &quot;</span>);       <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(grade);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Battery (V): &quot;</span>); <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(batteryVolts);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Big number: &quot;</span>);  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(bigNumber);
+
+  <span class="c-com">// Why types matter: integer math throws away the decimal part!</span>
+  <span class="c-kw">int</span> a = <span class="c-num">7</span>, b = <span class="c-num">2</span>;
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;7 / 2 as int   = &quot;</span>); <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(a / b);      <span class="c-com">// 3</span>
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;7 / 2 as float = &quot;</span>); <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-num">7.0</span> / <span class="c-num">2.0</span>);  <span class="c-com">// 3.50</span>
+}
+
+<span class="c-kw">void</span> <span class="c-ard">loop</span>() {
+  ledIsOn = !ledIsOn;                  <span class="c-com">// flip true to false, false to true</span>
+  <span class="c-ard">digitalWrite</span>(blinkPin, ledIsOn);     <span class="c-com">// turn the LED on or off</span>
+  blinkCount = blinkCount + <span class="c-num">1</span>;         <span class="c-com">// count the blinks</span>
+
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Blink #&quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(blinkCount);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;  LED is &quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(ledIsOn ? <span class="c-str">&quot;ON&quot;</span> : <span class="c-str">&quot;OFF&quot;</span>);
+
+  <span class="c-ard">delay</span>(<span class="c-num">500</span>);
+}</code></pre>
+        </figure>
+        <figure class="monitor">
+          <figcaption>Serial Monitor &mdash; 9600 baud</figcaption>
+          <pre>=== Lesson 1: Data Types ===
+Team: GearUp
+Grade: A
+Battery (V): 7.40
+Big number: 100000
+7 / 2 as int   = 3
+7 / 2 as float = 3.50
+Blink #1  LED is ON
+Blink #2  LED is OFF
+Blink #3  LED is ON</pre>
+        </figure>
+      </div>
+
+      <div class="watch"><span class="tag warn">Watch for</span>Look at the two division lines. <code>7 / 2</code> with whole numbers gives <b>3</b> &mdash; the leftover is thrown away. The same math with decimals gives <b>3.50</b>. The <i>type</i> you pick changes the answer.</div>
+
+      <div class="concept">
+        <h3>The C++ idea</h3>
+        <p>A <b>variable</b> is a labelled box that holds one value. The <b>type</b> (<code>int</code>, <code>float</code>, <code>bool</code>, <code>char</code>, <code>String</code>) tells C++ what kind of thing lives in the box and how much room to set aside. A <b>const</b> is a box that is locked shut once it is filled.</p>
+      </div>
+
+      <div class="trythis">
+        <h3>Try it yourself</h3>
+        <ol><li>Change <code>batteryVolts</code> to 11.1 and watch the printout update.</li><li>Add a new <code>int yearFounded = 2024;</code> and print it.</li><li>Make the LED blink faster by lowering the <code>delay(500)</code> number.</li></ol>
+      </div>
+    </section>
+    
+
+    <section class="lesson" id="lesson-2">
+      <div class="lesson-head">
+        <div class="lnum">02</div>
+        <div class="lhead-text">
+          <h2>Functions &amp; Loops</h2>
+          <p class="sub">Write it once, use it everywhere</p>
+          <div class="chips"><span class="chip">functions</span><span class="chip">parameters</span><span class="chip">return values</span><span class="chip">for-loop</span><span class="chip">while-loop</span><span class="chip">scope</span></div>
+        </div>
+      </div>
+
+      <p class="does"><span class="tag">What it does</span>Defines a reusable <code>blink()</code> function and an <code>addUp()</code> function that returns a total, then runs a blinking launch countdown.</p>
+
+      <div class="panels">
+        <figure class="ide">
+          <figcaption><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp; Lesson2_Functions.ino</figcaption>
+          <pre><code><span class="c-com">/*</span>
+<span class="c-com">  Lesson 2 - Functions &amp; Loops</span>
+<span class="c-com">  GearUp Robotics - Arduino &amp; C++ Starter Lab</span>
+<span class="c-com"></span>
+<span class="c-com">  Goal: package code into reusable functions, and repeat</span>
+<span class="c-com">  actions with for-loops and while-loops.</span>
+<span class="c-com">  Hardware: just your Arduino board + USB cable.</span>
+<span class="c-com">*/</span>
+
+<span class="c-kw">const</span> <span class="c-kw">int</span> led = <span class="c-ard">LED_BUILTIN</span>;
+
+<span class="c-com">// A function with PARAMETERS but no return value (void).</span>
+<span class="c-kw">void</span> blink(<span class="c-kw">int</span> times, <span class="c-kw">int</span> speedMs) {
+  <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-num">0</span>; i &lt; times; i++) {    <span class="c-com">// for-loop: repeat &#x27;times&#x27; times</span>
+    <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">HIGH</span>);
+    <span class="c-ard">delay</span>(speedMs);
+    <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">LOW</span>);
+    <span class="c-ard">delay</span>(speedMs);
+  }
+}
+
+<span class="c-com">// A function that RETURNS a value back to whoever called it.</span>
+<span class="c-kw">int</span> addUp(<span class="c-kw">int</span> from, <span class="c-kw">int</span> to) {
+  <span class="c-kw">int</span> total = <span class="c-num">0</span>;                       <span class="c-com">// &#x27;total&#x27; only exists inside here (scope)</span>
+  <span class="c-kw">for</span> (<span class="c-kw">int</span> n = from; n &lt;= to; n++) {
+    total += n;                        <span class="c-com">// shorthand for total = total + n</span>
+  }
+  <span class="c-kw">return</span> total;
+}
+
+<span class="c-kw">void</span> <span class="c-ard">setup</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">begin</span>(<span class="c-num">9600</span>);
+  <span class="c-ard">pinMode</span>(led, <span class="c-ard">OUTPUT</span>);
+
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;=== Lesson 2: Functions &amp; Loops ===&quot;</span>);
+
+  <span class="c-com">// Call the SAME function with different inputs.</span>
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Three slow blinks...&quot;</span>);
+  blink(<span class="c-num">3</span>, <span class="c-num">400</span>);
+
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Five fast blinks...&quot;</span>);
+  blink(<span class="c-num">5</span>, <span class="c-num">100</span>);
+
+  <span class="c-com">// Use a returned value.</span>
+  <span class="c-kw">int</span> sum = addUp(<span class="c-num">1</span>, <span class="c-num">10</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;1 + 2 + ... + 10 = &quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(sum);
+}
+
+<span class="c-kw">void</span> <span class="c-ard">loop</span>() {
+  <span class="c-com">// A while-loop runs as long as its condition stays true.</span>
+  <span class="c-kw">int</span> countdown = <span class="c-num">3</span>;
+  <span class="c-kw">while</span> (countdown &gt; <span class="c-num">0</span>) {
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;Launching in &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(countdown);
+    blink(<span class="c-num">1</span>, <span class="c-num">150</span>);
+    countdown--;                       <span class="c-com">// count down by one</span>
+    <span class="c-ard">delay</span>(<span class="c-num">700</span>);
+  }
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Liftoff! (pausing 3s)&quot;</span>);
+  <span class="c-ard">delay</span>(<span class="c-num">3000</span>);
+}</code></pre>
+        </figure>
+        <figure class="monitor">
+          <figcaption>Serial Monitor &mdash; 9600 baud</figcaption>
+          <pre>=== Lesson 2: Functions &amp; Loops ===
+Three slow blinks...
+Five fast blinks...
+1 + 2 + ... + 10 = 55
+Launching in 3
+Launching in 2
+Launching in 1
+Liftoff! (pausing 3s)</pre>
+        </figure>
+      </div>
+
+      <div class="watch"><span class="tag warn">Watch for</span><code>blink(3, 400)</code> and <code>blink(5, 100)</code> call the <i>same</i> function with different inputs. One function, many behaviours.</div>
+
+      <div class="concept">
+        <h3>The C++ idea</h3>
+        <p>A <b>function</b> is a named recipe for a job. <b>Parameters</b> are the ingredients you hand in; a <b>return value</b> is what you get back. A <b>for-loop</b> repeats a known number of times; a <b>while-loop</b> repeats until a condition stops being true. Variables made inside a function (its <b>scope</b>) vanish when the function ends.</p>
+      </div>
+
+      <div class="trythis">
+        <h3>Try it yourself</h3>
+        <ol><li>Call <code>blink(10, 60)</code> for a burst of fast blinks.</li><li>Change <code>addUp(1, 10)</code> to <code>addUp(1, 100)</code>. What is the total?</li><li>Start the countdown at 5 instead of 3.</li></ol>
+      </div>
+    </section>
+    
+
+    <section class="lesson" id="lesson-3">
+      <div class="lesson-head">
+        <div class="lnum">03</div>
+        <div class="lhead-text">
+          <h2>Conditions &amp; Operators</h2>
+          <p class="sub">Teaching the program to make choices</p>
+          <div class="chips"><span class="chip">if / else</span><span class="chip">comparison</span><span class="chip">&amp;&amp; || !</span><span class="chip">modulo %</span><span class="chip">Serial input</span></div>
+        </div>
+      </div>
+
+      <p class="does"><span class="tag">What it does</span>Reads a number you type into the Serial Monitor and sorts it: positive/negative/zero, even/odd, and blinks if it is an even number from 1 to 100.</p>
+
+      <div class="panels">
+        <figure class="ide">
+          <figcaption><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp; Lesson3_Conditions.ino</figcaption>
+          <pre><code><span class="c-com">/*</span>
+<span class="c-com">  Lesson 3 - Conditions &amp; Operators</span>
+<span class="c-com">  GearUp Robotics - Arduino &amp; C++ Starter Lab</span>
+<span class="c-com"></span>
+<span class="c-com">  Goal: make the program DECIDE what to do using if/else</span>
+<span class="c-com">  and logic. Type a number into the Serial Monitor and the</span>
+<span class="c-com">  board will sort it for you.</span>
+<span class="c-com">  Hardware: just your Arduino board + USB cable.</span>
+<span class="c-com">  Tip: in the Serial Monitor, set the line ending to &quot;Newline&quot;.</span>
+<span class="c-com">*/</span>
+
+<span class="c-kw">const</span> <span class="c-kw">int</span> led = <span class="c-ard">LED_BUILTIN</span>;
+
+<span class="c-kw">void</span> <span class="c-ard">setup</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">begin</span>(<span class="c-num">9600</span>);
+  <span class="c-ard">pinMode</span>(led, <span class="c-ard">OUTPUT</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;=== Lesson 3: Conditions ===&quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Type a whole number and press Enter.&quot;</span>);
+}
+
+<span class="c-kw">void</span> <span class="c-ard">loop</span>() {
+  <span class="c-kw">if</span> (<span class="c-ard">Serial</span>.<span class="c-ard">available</span>() &gt; <span class="c-num">0</span>) {         <span class="c-com">// did the user send something?</span>
+    <span class="c-kw">int</span> number = <span class="c-ard">Serial</span>.<span class="c-ard">parseInt</span>();     <span class="c-com">// read it as an integer</span>
+
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;You sent: &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(number);
+
+    <span class="c-com">// if / else if / else: only ONE branch runs.</span>
+    <span class="c-kw">if</span> (number &gt; <span class="c-num">0</span>) {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; positive&quot;</span>);
+    } <span class="c-kw">else</span> <span class="c-kw">if</span> (number &lt; <span class="c-num">0</span>) {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; negative&quot;</span>);
+    } <span class="c-kw">else</span> {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; zero&quot;</span>);
+    }
+
+    <span class="c-com">// % is the modulo operator: the remainder after dividing.</span>
+    <span class="c-kw">if</span> (number % <span class="c-num">2</span> == <span class="c-num">0</span>) {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; even&quot;</span>);
+    } <span class="c-kw">else</span> {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; odd&quot;</span>);
+    }
+
+    <span class="c-com">// &amp;&amp; means AND, || means OR, ! means NOT.</span>
+    <span class="c-kw">bool</span> inRange = (number &gt;= <span class="c-num">1</span> &amp;&amp; number &lt;= <span class="c-num">100</span>);
+    <span class="c-kw">if</span> (inRange &amp;&amp; number % <span class="c-num">2</span> == <span class="c-num">0</span>) {
+      <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;-&gt; even AND between 1 and 100: blinking!&quot;</span>);
+      <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-num">0</span>; i &lt; <span class="c-num">3</span>; i++) {
+        <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">HIGH</span>); <span class="c-ard">delay</span>(<span class="c-num">120</span>);
+        <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">LOW</span>);  <span class="c-ard">delay</span>(<span class="c-num">120</span>);
+      }
+    }
+    <span class="c-ard">Serial</span>.<span class="c-ard">println</span>();
+  }
+}</code></pre>
+        </figure>
+        <figure class="monitor">
+          <figcaption>Serial Monitor &mdash; 9600 baud</figcaption>
+          <pre>=== Lesson 3: Conditions ===
+Type a whole number and press Enter.
+You sent: 42
+-&gt; positive
+-&gt; even
+-&gt; even AND between 1 and 100: blinking!
+
+You sent: -7
+-&gt; negative
+-&gt; odd</pre>
+        </figure>
+      </div>
+
+      <div class="watch"><span class="tag warn">Watch for</span>Set the Serial Monitor's line ending to <b>Newline</b>, type a number, press Enter. The <code>%</code> operator gives the remainder &mdash; that is how the code knows if a number is even.</div>
+
+      <div class="concept">
+        <h3>The C++ idea</h3>
+        <p>An <b>if</b> statement runs code only when a condition is true; <b>else if</b> and <b>else</b> handle the other cases. <b>Comparison</b> operators (<code>&gt;</code>, <code>&lt;</code>, <code>==</code>) ask yes/no questions. <b>Logical</b> operators glue questions together: <code>&amp;&amp;</code> (and), <code>||</code> (or), <code>!</code> (not).</p>
+      </div>
+
+      <div class="trythis">
+        <h3>Try it yourself</h3>
+        <ol><li>Add an <code>else if (number &gt; 1000)</code> branch that prints "huge!".</li><li>Change the range check to 1&ndash;50 instead of 1&ndash;100.</li><li>Make odd numbers blink instead of even ones.</li></ol>
+      </div>
+    </section>
+    
+
+    <section class="lesson" id="lesson-4">
+      <div class="lesson-head">
+        <div class="lnum">04</div>
+        <div class="lhead-text">
+          <h2>Arrays</h2>
+          <p class="sub">One name, many values</p>
+          <div class="chips"><span class="chip">arrays</span><span class="chip">indexing</span><span class="chip">sizeof length</span><span class="chip">iterating a list</span></div>
+        </div>
+      </div>
+
+      <p class="does"><span class="tag">What it does</span>Stores a Morse-code pattern in an array and steps through it with a loop, blinking <b>S O S</b> on the on-board LED.</p>
+
+      <div class="panels">
+        <figure class="ide">
+          <figcaption><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp; Lesson4_Arrays.ino</figcaption>
+          <pre><code><span class="c-com">/*</span>
+<span class="c-com">  Lesson 4 - Arrays</span>
+<span class="c-com">  GearUp Robotics - Arduino &amp; C++ Starter Lab</span>
+<span class="c-com"></span>
+<span class="c-com">  Goal: store many values in ONE variable (an array) and</span>
+<span class="c-com">  step through them with a loop. The LED will blink &quot;SOS&quot;</span>
+<span class="c-com">  in Morse code.</span>
+<span class="c-com">  Hardware: just your Arduino board + USB cable.</span>
+<span class="c-com">*/</span>
+
+<span class="c-kw">const</span> <span class="c-kw">int</span> led = <span class="c-ard">LED_BUILTIN</span>;
+
+<span class="c-com">// An array: many values lined up inside one variable.</span>
+<span class="c-com">// 1 = short blink (a dot), 3 = long blink (a dash).</span>
+<span class="c-kw">int</span> sos[] = {<span class="c-num">1</span>, <span class="c-num">1</span>, <span class="c-num">1</span>,  <span class="c-num">3</span>, <span class="c-num">3</span>, <span class="c-num">3</span>,  <span class="c-num">1</span>, <span class="c-num">1</span>, <span class="c-num">1</span>};
+
+<span class="c-com">// Count how many items are in the array.</span>
+<span class="c-kw">int</span> sosLength = <span class="c-ard">sizeof</span>(sos) / <span class="c-ard">sizeof</span>(sos[<span class="c-num">0</span>]);
+
+<span class="c-kw">const</span> <span class="c-kw">int</span> unit = <span class="c-num">200</span>;   <span class="c-com">// base time in milliseconds</span>
+
+<span class="c-kw">void</span> blinkUnits(<span class="c-kw">int</span> units) {
+  <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">HIGH</span>);
+  <span class="c-ard">delay</span>(units * unit);          <span class="c-com">// a bigger number = a longer blink</span>
+  <span class="c-ard">digitalWrite</span>(led, <span class="c-ard">LOW</span>);
+  <span class="c-ard">delay</span>(unit);                  <span class="c-com">// short gap between blinks</span>
+}
+
+<span class="c-kw">void</span> <span class="c-ard">setup</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">begin</span>(<span class="c-num">9600</span>);
+  <span class="c-ard">pinMode</span>(led, <span class="c-ard">OUTPUT</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;=== Lesson 4: Arrays ===&quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;The array has &quot;</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(sosLength);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot; items.&quot;</span>);
+}
+
+<span class="c-kw">void</span> <span class="c-ard">loop</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Sending S O S ...&quot;</span>);
+
+  <span class="c-com">// Visit every item by its index (0, 1, 2, ...).</span>
+  <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-num">0</span>; i &lt; sosLength; i++) {
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;index &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(i);
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot; = &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(sos[i]);
+    blinkUnits(sos[i]);
+  }
+
+  <span class="c-ard">delay</span>(<span class="c-num">2000</span>);   <span class="c-com">// pause before repeating</span>
+}</code></pre>
+        </figure>
+        <figure class="monitor">
+          <figcaption>Serial Monitor &mdash; 9600 baud</figcaption>
+          <pre>=== Lesson 4: Arrays ===
+The array has 9 items.
+Sending S O S ...
+index 0 = 1
+index 1 = 1
+index 2 = 1
+index 3 = 3
+index 4 = 3
+index 5 = 3
+index 6 = 1
+index 7 = 1
+index 8 = 1</pre>
+        </figure>
+      </div>
+
+      <div class="watch"><span class="tag warn">Watch for</span>Indexes start at <b>0</b>, not 1. An array of 9 items uses indexes 0 through 8. The <code>sizeof</code> trick measures the list's length for you.</div>
+
+      <div class="concept">
+        <h3>The C++ idea</h3>
+        <p>An <b>array</b> is a row of boxes that share one name. You reach each box by its <b>index</b>, counting from 0. A <b>for-loop</b> is the natural partner of an array: it walks the index from the start to the end so you can touch every value in turn.</p>
+      </div>
+
+      <div class="trythis">
+        <h3>Try it yourself</h3>
+        <ol><li>Change <code>unit</code> from 200 to 400 to slow the Morse down.</li><li>Build a new pattern, like <code>{1, 3, 1, 3}</code>, and watch it play.</li><li>Spell a different letter: M is two dashes <code>{3, 3}</code>.</li></ol>
+      </div>
+    </section>
+    
+
+    <section class="lesson" id="lesson-5">
+      <div class="lesson-head">
+        <div class="lnum">05</div>
+        <div class="lhead-text">
+          <h2>Structs</h2>
+          <p class="sub">Design your own data type</p>
+          <div class="chips"><span class="chip">struct</span><span class="chip">grouping data</span><span class="chip">array of structs</span><span class="chip">dot access</span><span class="chip">bool return</span></div>
+        </div>
+      </div>
+
+      <p class="does"><span class="tag">What it does</span>Models the four joints of a robot arm as a custom <code>Joint</code> type, prints a safety report, then moves the claw out of range to show the check fire.</p>
+
+      <div class="panels">
+        <figure class="ide">
+          <figcaption><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp; Lesson5_Structs.ino</figcaption>
+          <pre><code><span class="c-com">/*</span>
+<span class="c-com">  Lesson 5 - Structs</span>
+<span class="c-com">  GearUp Robotics - Arduino &amp; C++ Starter Lab</span>
+<span class="c-com"></span>
+<span class="c-com">  Goal: bundle related information into your OWN data type.</span>
+<span class="c-com">  We&#x27;ll describe the joints of a robot arm - the kind of</span>
+<span class="c-com">  thing you build for real on a GearUp robot.</span>
+<span class="c-com">  Hardware: just your Arduino board + USB cable.</span>
+<span class="c-com">*/</span>
+
+<span class="c-com">// A struct groups related values under one name.</span>
+<span class="c-kw">struct</span> Joint {
+  <span class="c-kw">String</span> name;      <span class="c-com">// what the joint is called</span>
+  <span class="c-kw">int</span>    minAngle;  <span class="c-com">// lowest safe angle</span>
+  <span class="c-kw">int</span>    maxAngle;  <span class="c-com">// highest safe angle</span>
+  <span class="c-kw">int</span>    angle;     <span class="c-com">// where it is right now</span>
+};
+
+<span class="c-com">// An array of structs: four joints, like a real claw arm.</span>
+Joint arm[] = {
+  {<span class="c-str">&quot;Base&quot;</span>,     <span class="c-num">0</span>,  <span class="c-num">180</span>,  <span class="c-num">90</span>},
+  {<span class="c-str">&quot;Shoulder&quot;</span>, <span class="c-num">15</span>, <span class="c-num">165</span>,  <span class="c-num">90</span>},
+  {<span class="c-str">&quot;Elbow&quot;</span>,    <span class="c-num">0</span>,  <span class="c-num">180</span>,  <span class="c-num">45</span>},
+  {<span class="c-str">&quot;Claw&quot;</span>,     <span class="c-num">30</span>, <span class="c-num">110</span>,  <span class="c-num">30</span>}
+};
+<span class="c-kw">int</span> jointCount = <span class="c-ard">sizeof</span>(arm) / <span class="c-ard">sizeof</span>(arm[<span class="c-num">0</span>]);
+
+<span class="c-com">// A function that takes a struct and checks one of its fields.</span>
+<span class="c-kw">bool</span> isSafe(Joint j) {
+  <span class="c-kw">return</span> (j.angle &gt;= j.minAngle &amp;&amp; j.angle &lt;= j.maxAngle);
+}
+
+<span class="c-kw">void</span> report() {
+  <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-num">0</span>; i &lt; jointCount; i++) {
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(arm[i].name);          <span class="c-com">// read a field with a dot</span>
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot;: &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(arm[i].angle);
+    <span class="c-ard">Serial</span>.<span class="c-ard">print</span>(<span class="c-str">&quot; deg  -&gt; &quot;</span>);
+    <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(isSafe(arm[i]) ? <span class="c-str">&quot;OK&quot;</span> : <span class="c-str">&quot;OUT OF RANGE!&quot;</span>);
+  }
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>();
+}
+
+<span class="c-kw">void</span> <span class="c-ard">setup</span>() {
+  <span class="c-ard">Serial</span>.<span class="c-ard">begin</span>(<span class="c-num">9600</span>);
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;=== Lesson 5: Structs ===&quot;</span>);
+
+  report();
+
+  <span class="c-com">// Change one field, then check again.</span>
+  <span class="c-ard">Serial</span>.<span class="c-ard">println</span>(<span class="c-str">&quot;Opening the claw to 200 degrees...&quot;</span>);
+  arm[<span class="c-num">3</span>].angle = <span class="c-num">200</span>;                   <span class="c-com">// index 3 is the Claw</span>
+  report();
+}
+
+<span class="c-kw">void</span> <span class="c-ard">loop</span>() {
+  <span class="c-com">// Nothing here - everything ran once in setup().</span>
+}</code></pre>
+        </figure>
+        <figure class="monitor">
+          <figcaption>Serial Monitor &mdash; 9600 baud</figcaption>
+          <pre>=== Lesson 5: Structs ===
+Base: 90 deg  -&gt; OK
+Shoulder: 90 deg  -&gt; OK
+Elbow: 45 deg  -&gt; OK
+Claw: 30 deg  -&gt; OK
+
+Opening the claw to 200 degrees...
+Base: 90 deg  -&gt; OK
+Shoulder: 90 deg  -&gt; OK
+Elbow: 45 deg  -&gt; OK
+Claw: 200 deg  -&gt; OUT OF RANGE!</pre>
+        </figure>
+      </div>
+
+      <div class="watch"><span class="tag warn">Watch for</span>This is the real idea behind your Claw Master arm: every joint has a safe <code>minAngle</code> and <code>maxAngle</code>. Pushing the claw to 200&deg; trips the OUT OF RANGE warning.</div>
+
+      <div class="concept">
+        <h3>The C++ idea</h3>
+        <p>A <b>struct</b> bundles related values into one new type you invent. Here a <code>Joint</code> carries a name plus three angles. You read a field with a <b>dot</b>: <code>arm[3].angle</code>. Put structs in an array and you can describe a whole robot &mdash; exactly how real firmware tracks each servo.</p>
+      </div>
+
+      <div class="trythis">
+        <h3>Try it yourself</h3>
+        <ol><li>Add a fifth joint, like a <code>{"Wrist", 0, 180, 90}</code>.</li><li>Change a starting angle so a different joint reads OUT OF RANGE.</li><li>Add a <code>speed</code> field to the struct and print it in the report.</li></ol>
+      </div>
+    </section>
+    
+</main>
+
+<footer>
+  <div class="hazard-thin"></div>
+  <div class="foot-inner">
+    <p><b>How to teach these:</b> spend one session per lesson. Run the code first so students
+      see it work, then change one number together and re-upload &mdash; seeing cause and effect
+      is the whole lesson. The "Try it yourself" tasks are deliberately small so a beginner can
+      succeed on the first attempt.</p>
+    <p>The lessons build on each other: data &rarr; functions &rarr; decisions &rarr; lists &rarr;
+      your own data types. By Lesson&nbsp;5 students are modelling a real robot arm &mdash; the
+      same idea behind GearUp's Claw Master.</p>
+    <p style="margin-top:18px;color:#8a8b80;">Made for GearUp Robotics STEM outreach &middot; Free to copy, print, and share.</p>
+  </div>
+</footer>
+</body>
+</html>
